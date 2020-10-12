@@ -40,14 +40,18 @@ function! s:win_enter_handler() abort
     endif
 endfunction
 
-let s:bin_dir = expand('<sfile>:p:h:h:h').'/bin/'
-if has('win32')
+let s:has_nvim = has('nvim')
+let s:has_win32 = has('win32')
+
+if s:has_win32
     let s:minimap_gen = s:bin_dir.'minimap_generator.bat'
     let s:default_shell = 'cmd.exe'
 else
     let s:minimap_gen = s:bin_dir.'minimap_generator.sh'
     let s:default_shell = 'sh'
 endif
+
+let s:bin_dir = expand('<sfile>:p:h:h:h').'/bin/'
 let s:minimap_cache = {}
 
 function! s:toggle_window() abort
@@ -201,7 +205,7 @@ function! s:process_buffer(mmwinnr, bufnr, fname, ftype) abort
     let usershell = &shell
     let &shell = s:default_shell
 
-    if has('nvim')
+    if s:has_nvim
         let minimap_cmd = 'w !'.s:minimap_gen.' '.hscale.' '.vscale.' '.g:minimap_width
         " echom minimap_cmd
         let minimap_output = execute(minimap_cmd) " Not work for vim 8.2 ?
@@ -250,7 +254,7 @@ function! s:render_content(mmwinnr, bufnr, fname, ftype) abort
 
     silent 1,$delete _
     silent put =cache.content
-    if has('nvim')
+    if s:has_nvim
         silent 1,3delete _
     else
         silent 1delete _
@@ -273,7 +277,7 @@ function! s:source_move() abort
     let winid = win_getid(mmwinnr)
     let curr = line('.') - 1
     let total = line('$')
-    let mmheight = getwininfo(winid)[0].botline
+    let mmheight = getwininfo(win_getid(mmwinnr))[0].botline
     let pos = float2nr(1.0 * curr / total * mmheight) + 1
     call s:highlight_line(winid, pos)
     " TODO: Also move the cursor of minimap, but how to? <20-09-25 17:30, Wenxuan Zhang> "
@@ -308,7 +312,9 @@ function! s:minimap_win_enter() abort
 endfunction
 
 function! s:source_win_enter() abort
-    call s:source_move()
+    if !s:has_nvim
+        call s:source_move()
+    endif
 endfunction
 
 function! s:minimap_buffer_enter_handler() abort
