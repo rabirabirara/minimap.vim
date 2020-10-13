@@ -71,19 +71,12 @@ function! s:close_window() abort
         if winbufnr(2) != -1
             " Other windows are open, only close the this one
             close
+            exe 'wincmd p'
         endif
     else
         " Go to the minimap window, close it and then come back to the
         " original window
-        let curbufnr = bufnr('%')
-        exe mmwinnr . 'wincmd w'
-        close
-        " Need to jump back to the original window only if we are not
-        " already in that window
-        let winnum = bufwinnr(curbufnr)
-        if winnr() != winnum
-            exe winnum . 'wincmd w'
-        endif
+        exe mmwinnr . 'wincmd c'
     endif
 endfunction
 
