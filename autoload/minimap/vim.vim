@@ -152,7 +152,8 @@ function! s:open_window() abort
         autocmd BufEnter,FileType *                             call s:handle_autocmd(3)
         autocmd FocusGained,CursorMoved,CursorMovedI <buffer>   call s:handle_autocmd(4)
         if g:minimap_highlight_range == 1
-            if has('nvim')      " Vim does not have a WinScrolled autocmd event.
+            " Vim and Neovim (pre-November 2020) do not have a WinScrolled autocmd event.
+            if g:minimap_win_scrolled_exists == 1
                 autocmd FocusGained,WinScrolled *               call s:handle_autocmd(5)
             else
                 autocmd FocusGained,CursorMoved,CursorMovedI *  call s:handle_autocmd(5)
